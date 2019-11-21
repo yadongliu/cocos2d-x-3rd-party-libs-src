@@ -302,6 +302,7 @@ function generate_android_standalone_toolchain()
         return
     fi
 
+    # 
     "$ANDROID_NDK/build/tools/make-standalone-toolchain.sh" \
       --arch="${arch}" \
       --platform="${api_level}" \
@@ -320,6 +321,7 @@ do
         archive_name=$lib
     fi
 
+    echo "archive_name is $archive_name"
 
     mkdir -p $cfg_platform_name/$archive_name/include/
 
@@ -377,6 +379,8 @@ do
         if [ $cfg_platform_name = "android" ];then
             if [ $MY_TARGET_ARCH = "arm64-v8a" ];then
                 export ANDROID_API=android-$cfg_default_arm64_build_api
+            elif [ $MY_TARGET_ARCH = "x86_64" ];then
+                export ANDROID_API=android-$cfg_default_x86_64_build_api
             else
                 export ANDROID_API=android-$build_api
             fi
@@ -384,6 +388,7 @@ do
             generate_android_standalone_toolchain $MY_TARGET_ARCH $ANDROID_API
             export ANDROID_TOOLCHAIN_PATH="${toolchain_path}"
             export PATH="${toolchain_path}/bin:${PATH}"
+            echo "ANDROID_TOOLCHAIN_PATH is $ANDROID_TOOLCHAIN_PATH"
         fi
         echo "build api is $ANDROID_API."
 
@@ -398,9 +403,13 @@ do
         PREFIX="${top_dir}/contrib/install-${cfg_platform_name}/${arch}"
 
         my_target_host=cfg_${arch}_host_machine
+        echo "my_target_host is $my_target_host"
         if [ $cfg_is_cross_compile = "no" ];then
             cfg_build_machine=${!my_target_host}
         fi
+        echo "my_target_host is $my_target_host"
+        echo "cfg_build_machine is $cfg_build_machine"
+        echo "PREFIX is $PREFIX"
 
         export BUILD_LIB=$lib
 
@@ -416,7 +425,11 @@ do
         export ENABLE_BITCODE
         echo "ENABLE_BITCODE := ${cfg_build_bitcode}" >> config.mak
 
+        echo "now calling make !!!!!!"
+
         make
+
+        echo "after calling make !!!!!!"
 
         cd -
 
